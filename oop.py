@@ -91,6 +91,21 @@ class MyClass(object):
     def __getitem__(self):
         pass
 
+    # getattr方法,使对象获得动态获取属性的能力
+    # 但只有当实例中没有定义该属性,也没有动态绑定时,才会调用该方法获取属性
+    # 可以返回属性值,也可以返回函数(lambda表达式)
+    # 若要获取的属性在getattr方法中也没有定义,默认返回None
+    # 如果要限制对象可以获取的属性,须在getattr方法结尾raise AttributeError('...')
+    # getattr的应用示例见下面的Chain类
+    def __getattr__(self, item):
+        pass
+
+    # 定义__call__方法后,对象成为callable对象
+    # 对象自身可以被视为方法进行调用
+    # 可以使用callable()方法检查对象是否是callable对象
+    def __call__(self, *args, **kwargs):
+        pass
+
 
 print(MyClass('Micheal'))
 
@@ -144,3 +159,26 @@ for n in fib:
 print(fib[10])
 
 print(fib[5:10])
+
+
+# getattr方法应用例子:
+# 链式调用动态形成url
+class Chain(object):
+
+    def __init__(self, path=''):
+        self._path = path
+
+    def __getattr__(self, path):
+        return Chain('%s/%s' % (self._path, path))
+
+    def __str__(self):
+        return self._path
+
+    __repr__ = __str__
+
+    __call__ = __getattr__
+
+
+print('chain=', Chain().status.user.list, ';')
+# REST API url中带参数,该写法需要定义__call__方法才能使用
+print('chain=', Chain().users('jaiz').repos, ';')
